@@ -342,34 +342,33 @@ static ngx_int_t ngx_http_secure_download_check_hash(ngx_http_request_t *r, ngx_
   return NGX_OK;
 }
 
+// old url: http://cdn_hostname/download/nginx.zip/9405801ae719fb8458b0c479efe87f30/536D4489
+// new url: http://cdn_hostname/download/nginx.zip?k=9405801ae719fb8458b0c479efe87f30&e=536D4489
 static ngx_int_t ngx_http_secure_download_split_uri(ngx_http_request_t *r, ngx_http_secure_download_split_uri_t *sdsu)
 {
-  int md5_len = 0;
-  int tstamp_len = 0;
   int len = r->uri.len;
   const char *uri = (char*)r->uri.data;
+  const char *args = (char*)r->args.data;
 
   ngx_http_secure_download_loc_conf_t *sdc = ngx_http_get_module_loc_conf(r, ngx_http_secure_download_module);
 
-  while(len && uri[--len] != '/')
-	  ++tstamp_len;
-  if(tstamp_len != 8) {
-	  ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "timestamp size mismatch: %d", tstamp_len);
+  // potential problems:
+  // 1) args may not ends with "\0"
+  // 2) checking the length of timestamp and md5 is postponed
+  sdsu->timestamp = ngx_strstr(args, "e=");
+  if (sdsu->timestamp == NULL) {
+	  ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "timestamp not found");
 	  return NGX_ERROR;
+  } else {
+	  sdsu->timestamp += 2;
   }
-  sdsu->timestamp = uri + len + 1;
 
-  while(len && uri[--len] != '/')
-	  ++md5_len;
-  if(md5_len != 32) {
-	  ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "md5 size mismatch: %d", md5_len);
+  sdsu->md5 = ngx_strstr(args, "k=");
+  if (sdsu->md5 == NULL) {
+	  ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "md5 not found");
 	  return NGX_ERROR;
-  }
-  sdsu->md5 = uri + len + 1;
-
-  if(len == 0) {
-	  ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "bad path", 0);
-	  return NGX_ERROR;
+  } else {
+	  sdsu->md5 += 2;
   }
 
   sdsu->path = uri;
