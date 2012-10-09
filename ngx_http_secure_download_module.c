@@ -351,11 +351,15 @@ static ngx_int_t ngx_http_secure_download_split_uri(ngx_http_request_t *r, ngx_h
   const char *args = (char*)r->args.data;
 
   ngx_http_secure_download_loc_conf_t *sdc = ngx_http_get_module_loc_conf(r, ngx_http_secure_download_module);
+  if (args == NULL){ 
+	  ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "timestamp and md5 is not found");
+	  return NGX_ERROR;
+  }
 
   // potential problems:
   // 1) args may not ends with "\0"
   // 2) checking the length of timestamp and md5 is postponed
-  sdsu->timestamp = ngx_strstr(args, "e=");
+  sdsu->timestamp = ngx_strstrn(args, "e=", 2-1);
   if (sdsu->timestamp == NULL) {
 	  ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "timestamp not found");
 	  return NGX_ERROR;
@@ -363,7 +367,7 @@ static ngx_int_t ngx_http_secure_download_split_uri(ngx_http_request_t *r, ngx_h
 	  sdsu->timestamp += 2;
   }
 
-  sdsu->md5 = ngx_strstr(args, "k=");
+  sdsu->md5 = ngx_strstrn(args, "k=", 2-1);
   if (sdsu->md5 == NULL) {
 	  ngx_log_debug(NGX_LOG_DEBUG_HTTP, r->connection->log, 0, "md5 not found");
 	  return NGX_ERROR;
