@@ -347,9 +347,9 @@ static ngx_int_t ngx_http_secure_download_check_hash(ngx_http_request_t *r, ngx_
 static ngx_int_t ngx_http_secure_download_split_uri(ngx_http_request_t *r, ngx_http_secure_download_split_uri_t *sdsu)
 {
   int len = r->uri.len;
-  int args_len = r->args.len;
+  size_t args_len = r->args.len;
   const char *uri = (char*)r->uri.data;
-  const char *args = (char*)r->args.data;
+  u_char *args = (char*)r->args.data;
 
   ngx_http_secure_download_loc_conf_t *sdc = ngx_http_get_module_loc_conf(r, ngx_http_secure_download_module);
   if (args == NULL){ 
