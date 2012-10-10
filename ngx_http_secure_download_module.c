@@ -348,8 +348,8 @@ static ngx_int_t ngx_http_secure_download_split_uri(ngx_http_request_t *r, ngx_h
 {
   int len = r->uri.len;
   size_t args_len = r->args.len;
+  u_char *args = r->args.data;
   const char *uri = (char*)r->uri.data;
-  u_char *args = (char*)r->args.data;
 
   ngx_http_secure_download_loc_conf_t *sdc = ngx_http_get_module_loc_conf(r, ngx_http_secure_download_module);
   if (args == NULL){ 
