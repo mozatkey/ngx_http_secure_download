@@ -159,7 +159,6 @@ static ngx_int_t ngx_http_secure_download_variable(ngx_http_request_t *r, ngx_ht
   unsigned remaining_time = 0;
   ngx_http_secure_download_loc_conf_t *sdc;
   ngx_http_secure_download_split_uri_t sdsu;
-  ngx_str_t rel_path;
   ngx_str_t secret;
   int value = 0;
   
@@ -217,9 +216,6 @@ static ngx_int_t ngx_http_secure_download_variable(ngx_http_request_t *r, ngx_ht
     value = -2;
     goto finish;
   }
-  
-  rel_path.data = r->uri.data;
-  rel_path.len = sdsu.path_len;
   
   finish: 
   
